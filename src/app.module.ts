@@ -4,6 +4,8 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
+import { UserAuth } from './user-auth/entities/user-auth.entity';
+import { UserAuthModule } from './user-auth/user-auth.module';
 
 @Module({
   imports: [
@@ -17,7 +19,9 @@ import { join } from 'path';
       type: 'sqlite',
       database: 'db/sqlite.db',
       synchronize: true,
+      entities: [UserAuth],
     }),
+    UserAuthModule,
   ],
 })
 export class AppModule {}
