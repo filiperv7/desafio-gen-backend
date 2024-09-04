@@ -1,0 +1,83 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type UserAuth {
+  id: Int!
+  name: String!
+  email: String!
+  nick_name: String!
+  password: String!
+  position: String!
+  questions: [Question!]!
+}
+
+type Tag {
+  id: Int!
+  tag_name: String!
+  questions: [Question!]!
+}
+
+type Question {
+  id: Int!
+  title: String!
+  description: String!
+  tags: [Tag!]!
+  user: UserAuth!
+  userId: Int!
+}
+
+type UserJwtOutput {
+  access_token: String!
+  token_type: String!
+  expires_in: String!
+}
+
+type Query {
+  login(login: LoginInput!): UserJwtOutput!
+  questions: [Question!]!
+  question(id: Int!): Question!
+}
+
+input LoginInput {
+  nick_name: String!
+  password: String!
+}
+
+type Mutation {
+  createUserAuth(createUserAuthInput: CreateUserAuthInput!): UserAuth!
+  createQuestion(createQuestionInput: CreateQuestionInput!): Question!
+  updateQuestion(updateQuestionInput: UpdateQuestionInput!): Question!
+  removeQuestion(id: Int!): Question!
+}
+
+input CreateUserAuthInput {
+  name: String!
+  email: String!
+  nick_name: String!
+  password: String!
+  position: String!
+}
+
+input CreateQuestionInput {
+  title: String!
+  description: String!
+  tags: [CreateTagInput!]!
+}
+
+input CreateTagInput {
+  id: Int
+  tag_name: String!
+}
+
+input UpdateQuestionInput {
+  title: String!
+  description: String!
+  tags: [UpdateTagInput]
+  id: Int!
+}
+
+input UpdateTagInput {
+  id: Int!
+  tag_name: String!
+}
