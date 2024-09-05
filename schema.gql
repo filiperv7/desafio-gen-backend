@@ -22,10 +22,16 @@ type Question {
   id: Int!
   title: String!
   description: String!
+  creation_date: DateTime!
   tags: [Tag!]!
   user: UserAuth!
   userId: Int!
 }
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 type UserJwtOutput {
   access_token: String!
@@ -35,13 +41,18 @@ type UserJwtOutput {
 
 type Query {
   login(login: LoginInput!): UserJwtOutput!
-  questions: [Question!]!
+  questions(searchInput: SearchInput): [Question!]!
   question(id: Int!): Question!
 }
 
 input LoginInput {
   nick_name: String!
   password: String!
+}
+
+input SearchInput {
+  filter_tag_ids: [Int]
+  only_mine: Boolean
 }
 
 type Mutation {
@@ -62,6 +73,7 @@ input CreateUserAuthInput {
 input CreateQuestionInput {
   title: String!
   description: String!
+  creation_date: DateTime
   tags: [CreateTagInput!]!
 }
 
@@ -73,6 +85,7 @@ input CreateTagInput {
 input UpdateQuestionInput {
   title: String!
   description: String!
+  creation_date: DateTime
   tags: [UpdateTagInput]
   id: Int!
 }
