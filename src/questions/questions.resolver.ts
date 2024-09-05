@@ -1,4 +1,5 @@
 import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Request } from 'express';
 import { CreateQuestionInput } from './dto/create-question.input';
 import { SearchInput } from './dto/search.input';
 import { UpdateQuestionInput } from './dto/update-question.input';
@@ -12,7 +13,7 @@ export class QuestionsResolver {
   @Mutation(() => Question)
   createQuestion(
     @Args('createQuestionInput') createQuestionInput: CreateQuestionInput,
-    @Context() context: any,
+    @Context() context: { req: Request },
   ) {
     const token = context.req.headers.authorization;
 
@@ -21,7 +22,7 @@ export class QuestionsResolver {
 
   @Query(() => [Question], { name: 'questions' })
   findAll(
-    @Context() context: any,
+    @Context() context: { req: Request },
     @Args('searchInput', { nullable: true }) searchInput?: SearchInput,
   ) {
     const token = context.req.headers.authorization;
@@ -37,7 +38,7 @@ export class QuestionsResolver {
   @Mutation(() => Question)
   updateQuestion(
     @Args('updateQuestionInput') updateQuestionInput: UpdateQuestionInput,
-    @Context() context: any,
+    @Context() context: { req: Request },
   ) {
     const token = context.req.headers.authorization;
 

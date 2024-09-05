@@ -1,4 +1,5 @@
 import { Args, Context, Int, Mutation, Resolver } from '@nestjs/graphql';
+import { Request } from 'express';
 import { AnswersService } from './answers.service';
 import { CreateAnswerInput } from './dto/create-answer.input';
 import { Answer } from './entities/answer.entity';
@@ -10,7 +11,7 @@ export class AnswersResolver {
   @Mutation(() => Answer)
   createAnswer(
     @Args('createAnswerInput') createAnswerInput: CreateAnswerInput,
-    @Context() context: any,
+    @Context() context: { req: Request },
   ) {
     const token = context.req.headers.authorization;
 
@@ -20,7 +21,7 @@ export class AnswersResolver {
   @Mutation(() => Answer)
   removeAnswer(
     @Args('id', { type: () => Int }) id: number,
-    @Context() context: any,
+    @Context() context: { req: Request },
   ) {
     const token = context.req.headers.authorization;
 
