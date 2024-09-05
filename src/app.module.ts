@@ -4,6 +4,8 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
+import { AnswersModule } from './answers/answers.module';
+import { Answer } from './answers/entities/answer.entity';
 import { Question } from './questions/entities/question.entity';
 import { Tag } from './questions/entities/tag.entity';
 import { QuestionsModule } from './questions/questions.module';
@@ -22,10 +24,11 @@ import { UserAuthModule } from './user-auth/user-auth.module';
       type: 'sqlite',
       database: 'db/sqlite.db',
       synchronize: true,
-      entities: [UserAuth, Question, Tag],
+      entities: [UserAuth, Question, Tag, Answer],
     }),
     UserAuthModule,
     QuestionsModule,
+    AnswersModule,
   ],
 })
 export class AppModule {}

@@ -6,8 +6,10 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Answer } from '../../answers/entities/answer.entity';
 import { UserAuth } from '../../user-auth/entities/user-auth.entity';
 import { Tag } from './tag.entity';
 
@@ -27,7 +29,7 @@ export class Question {
   description: string;
 
   @Field()
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'creationDate' })
   creation_date: Date;
 
   @Field(() => [Tag])
@@ -46,4 +48,8 @@ export class Question {
   @Field(() => Int)
   @Column()
   userId: number;
+
+  @Field(() => [Answer])
+  @OneToMany(() => Answer, (answer) => answer.question)
+  answers: Answer[];
 }

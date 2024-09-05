@@ -10,6 +10,7 @@ type UserAuth {
   password: String!
   position: String!
   questions: [Question!]!
+  answers: [Answer!]!
 }
 
 type Tag {
@@ -26,12 +27,23 @@ type Question {
   tags: [Tag!]!
   user: UserAuth!
   userId: Int!
+  answers: [Answer!]!
 }
 
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type Answer {
+  id: Int!
+  content: String!
+  creation_date: DateTime!
+  user: UserAuth!
+  user_id: Int!
+  question: Question!
+  question_id: Int!
+}
 
 type UserJwtOutput {
   access_token: String!
@@ -60,6 +72,8 @@ type Mutation {
   createQuestion(createQuestionInput: CreateQuestionInput!): Question!
   updateQuestion(updateQuestionInput: UpdateQuestionInput!): Question!
   removeQuestion(id: Int!): Question!
+  createAnswer(createAnswerInput: CreateAnswerInput!): Answer!
+  removeAnswer(id: Int!): Answer!
 }
 
 input CreateUserAuthInput {
@@ -93,4 +107,9 @@ input UpdateQuestionInput {
 input UpdateTagInput {
   id: Int!
   tag_name: String!
+}
+
+input CreateAnswerInput {
+  content: String!
+  question_id: Int!
 }

@@ -101,7 +101,7 @@ describe('UserAuthService', () => {
         password: 'securepassword',
       };
 
-      const user: UserAuth = {
+      const user: Partial<UserAuth> = {
         id: 1,
         name: 'John Doe',
         email: 'johndoe@example.com',
@@ -111,7 +111,7 @@ describe('UserAuthService', () => {
         questions: [],
       };
 
-      jest.spyOn(repository, 'findOneBy').mockResolvedValue(user);
+      jest.spyOn(repository, 'findOneBy').mockResolvedValue(user as UserAuth);
 
       const tokenOutput: UserJwtOutput = {
         access_token: 'jwt-token',

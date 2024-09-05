@@ -1,5 +1,6 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Answer } from '../../answers/entities/answer.entity';
 import { Question } from '../../questions/entities/question.entity';
 
 @ObjectType()
@@ -32,4 +33,8 @@ export class UserAuth {
   @Field(() => [Question])
   @OneToMany(() => Question, (question) => question.user)
   questions: Question[];
+
+  @Field(() => [Answer])
+  @OneToMany(() => Answer, (answer) => answer.user)
+  answers: Answer[];
 }
