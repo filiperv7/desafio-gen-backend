@@ -5,7 +5,7 @@ import { IsArray, IsBoolean, IsOptional } from 'class-validator';
 export class SearchInput {
   @IsOptional()
   @IsArray()
-  @Field(() => [Int], { nullable: 'itemsAndList' })
+  @Field(() => [Int], { nullable: true })
   filter_tag_ids?: number[];
 
   @IsOptional()
