@@ -100,13 +100,8 @@ input UpdateQuestionInput {
   title: String!
   description: String!
   creation_date: DateTime
-  tags: [UpdateTagInput]
+  tags: [CreateTagInput!]!
   id: Int!
-}
-
-input UpdateTagInput {
-  id: Int!
-  tag_name: String!
 }
 
 input CreateAnswerInput {

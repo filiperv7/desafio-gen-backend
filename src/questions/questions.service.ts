@@ -1,7 +1,9 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -122,8 +124,70 @@ export class QuestionsService {
     throw new NotFoundException('Pergunta não encontrada!');
   }
 
-  update(id: number, updateQuestionInput: UpdateQuestionInput) {
-    return `This action updates a #${id} question`;
+  async update(
+    id: number,
+    updateQuestionInput: UpdateQuestionInput,
+    token: string,
+  ): Promise<Question> {
+    const userId = this.decodeToken(token);
+
+    const question: Question = await this.questionRepository.findOne({
+      where: { id },
+      relations: ['answers', 'tags'],
+    });
+
+    if (!question) {
+      throw new NotFoundException('Pergunta não encontrada.');
+    }
+
+    if (question.user_id !== userId) {
+      throw new UnauthorizedException(
+        'Você só pode editar suas próprias perguntas.',
+      );
+    }
+
+    if (question.answers.length > 0) {
+      throw new BadRequestException(
+        'Esta pergunta já possui respostas, portanto não pode ser alterada.',
+      );
+    }
+
+    const alreadyExist = await this.questionRepository.findOneBy({
+      title: updateQuestionInput.title,
+      description: updateQuestionInput.description,
+      user_id: userId,
+    });
+
+    if (alreadyExist === null) {
+      const tags = await Promise.all(
+        updateQuestionInput.tags.map(async (tagInput) => {
+          let tag = tagInput;
+
+          if (!tagInput.id) {
+            tag = await this.tagRepository.findOne({
+              where: { tag_name: tagInput.tag_name },
+            });
+            if (!tag) {
+              tag = await this.tagRepository.save({
+                tag_name: tagInput.tag_name,
+              });
+            }
+          }
+
+          return tag;
+        }),
+      );
+
+      question.title = updateQuestionInput.title;
+      question.description = updateQuestionInput.description;
+      question.tags = tags as Tag[];
+
+      await this.questionRepository.save(question);
+
+      return question;
+    }
+
+    throw new ConflictException('Você já fez esta pergunta');
   }
 
   remove(id: number) {

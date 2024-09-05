@@ -37,10 +37,14 @@ export class QuestionsResolver {
   @Mutation(() => Question)
   updateQuestion(
     @Args('updateQuestionInput') updateQuestionInput: UpdateQuestionInput,
+    @Context() context: any,
   ) {
+    const token = context.req.headers.authorization;
+
     return this.questionsService.update(
       updateQuestionInput.id,
       updateQuestionInput,
+      token,
     );
   }
 

@@ -1,4 +1,9 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -8,6 +13,7 @@ import { Repository } from 'typeorm';
 import { CreateQuestionInput } from './dto/create-question.input';
 import { CreateTagInput } from './dto/create-tag.input';
 import { SearchInput } from './dto/search.input';
+import { UpdateQuestionInput } from './dto/update-question.input';
 import { Question } from './entities/question.entity';
 import { Tag } from './entities/tag.entity';
 import { QuestionsService } from './questions.service';
@@ -153,8 +159,7 @@ describe('QuestionsService', () => {
         only_mine: true,
       };
 
-      const decodedToken = { id: 1 };
-      jest.spyOn(jwtService, 'decode').mockReturnValue(decodedToken);
+      jest.spyOn(jwtService, 'decode').mockReturnValue({ id: 1 });
 
       jest.spyOn(questionRepository, 'find').mockResolvedValue(mockQuestions);
 
@@ -222,6 +227,131 @@ describe('QuestionsService', () => {
         .mockReturnValue(queryBuilder as any);
 
       await expect(service.findOne(id)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('update', () => {
+    const updateQuestionInput: UpdateQuestionInput = {
+      id: 3,
+      title: 'Updated Question Title',
+      description: 'Updated description',
+      tags: [{ tag_name: 'tag1' }, { tag_name: 'tag2' }],
+    };
+
+    const mockQuestion = {
+      id: 3,
+      title: 'Original Question Title',
+      description: 'Original description',
+      user_id: 1,
+      answers: [],
+      tags: [],
+    } as Question;
+
+    it('should update a question successfully', async () => {
+      const mockToken = 'Bearer sample.jwt.token';
+      const questionId = 3;
+
+      jest.spyOn(jwtService, 'decode').mockReturnValue({ id: 1 });
+      jest.spyOn(questionRepository, 'findOne').mockResolvedValue(mockQuestion);
+      jest.spyOn(questionRepository, 'findOneBy').mockResolvedValue(null);
+      jest.spyOn(tagRepository, 'findOne').mockResolvedValue(null);
+      jest.spyOn(tagRepository, 'save').mockImplementation((tag) => {
+        return Promise.resolve({
+          id: tag.tag_name === 'tag1' ? 1 : 2,
+          tag_name: tag.tag_name,
+        } as Tag);
+      });
+      jest.spyOn(questionRepository, 'save').mockResolvedValue({
+        ...updateQuestionInput,
+        id: questionId,
+        tags: [
+          { id: 1, tag_name: 'tag1' },
+          { id: 2, tag_name: 'tag2' },
+        ] as Tag[],
+      } as Question);
+
+      const result = await service.update(
+        questionId,
+        updateQuestionInput,
+        mockToken,
+      );
+
+      expect(result).toEqual({
+        id: questionId,
+        ...updateQuestionInput,
+        tags: [
+          { id: 1, tag_name: 'tag1' },
+          { id: 2, tag_name: 'tag2' },
+        ],
+        user_id: 1,
+        answers: [],
+      });
+    });
+
+    it('should throw NotFoundException if question is not found', async () => {
+      const mockToken = 'Bearer sample.jwt.token';
+      const questionId = 3;
+
+      jest.spyOn(jwtService, 'decode').mockReturnValue({ id: 1 });
+      jest.spyOn(questionRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(
+        service.update(questionId, updateQuestionInput, mockToken),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw BadRequestException if the question has answers', async () => {
+      const mockToken = 'Bearer sample.jwt.token';
+      const questionId = 3;
+
+      const mockQuestion = {
+        id: questionId,
+        title: 'Original Question Title',
+        description: 'Original description',
+        answers: [{ content: 'Some answer' }],
+        user_id: 1,
+      } as Question;
+
+      jest.spyOn(jwtService, 'decode').mockReturnValue({ id: 1 });
+      jest.spyOn(questionRepository, 'findOne').mockResolvedValue(mockQuestion);
+
+      await expect(
+        service.update(questionId, updateQuestionInput, mockToken),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw ConflictException if a question with the same title and user already exists', async () => {
+      const mockToken = 'Bearer sample.jwt.token';
+      const questionId = 3;
+
+      const existingQuestion = {
+        id: 3,
+        title: updateQuestionInput.title,
+        description: updateQuestionInput.description,
+        user_id: 1,
+      } as Question;
+
+      jest.spyOn(jwtService, 'decode').mockReturnValue({ id: 1 });
+      jest.spyOn(questionRepository, 'findOne').mockResolvedValue(mockQuestion);
+      jest
+        .spyOn(questionRepository, 'findOneBy')
+        .mockResolvedValue(existingQuestion);
+
+      await expect(
+        service.update(questionId, updateQuestionInput, mockToken),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should throw UnauthorizedException if the user is not the author of the question', async () => {
+      const mockToken = 'Bearer sample.jwt.token';
+      const questionId = 3;
+
+      jest.spyOn(jwtService, 'decode').mockReturnValue({ id: 2 });
+      jest.spyOn(questionRepository, 'findOne').mockResolvedValue(mockQuestion);
+
+      await expect(
+        service.update(questionId, updateQuestionInput, mockToken),
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 });
