@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -103,8 +107,19 @@ export class QuestionsService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} question`;
+  async findOne(id: number): Promise<Question> {
+    const question = await this.questionRepository
+      .createQueryBuilder('question')
+      .leftJoinAndSelect('question.user', 'user')
+      .leftJoinAndSelect('question.tags', 'tags')
+      .leftJoinAndSelect('question.answers', 'answers')
+      .leftJoinAndSelect('answers.user', 'answerUser')
+      .where('question.id = :id', { id })
+      .getOne();
+
+    if (question) return question;
+
+    throw new NotFoundException('Pergunta não encontrada!');
   }
 
   update(id: number, updateQuestionInput: UpdateQuestionInput) {

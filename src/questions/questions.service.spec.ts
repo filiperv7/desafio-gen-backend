@@ -1,7 +1,9 @@
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { Answer } from 'src/answers/entities/answer.entity';
+import { UserAuth } from 'src/user-auth/entities/user-auth.entity';
 import { Repository } from 'typeorm';
 import { CreateQuestionInput } from './dto/create-question.input';
 import { CreateTagInput } from './dto/create-tag.input';
@@ -84,7 +86,7 @@ describe('QuestionsService', () => {
       expect(result).toEqual({
         id: 1,
         ...createQuestionInput,
-        userId: decodedToken.id,
+        user_id: decodedToken.id,
         tags: [
           { id: 1, tag_name: 'tag1' },
           { id: 2, tag_name: 'tag2' },
@@ -167,6 +169,59 @@ describe('QuestionsService', () => {
       const result = await service.findAll('token');
 
       expect(result).toEqual(mockQuestions);
+    });
+  });
+
+  describe('findOne', () => {
+    it('should return a complete question with user, tags, and answers', async () => {
+      const id = 1;
+      const mockQuestion: Partial<Question> = {
+        id,
+        title: 'Sample Question',
+        description: 'Sample description',
+        creation_date: new Date(),
+        user: { id: 1, name: 'user1' } as UserAuth,
+        tags: [{ id: 1, tag_name: 'tag1' }] as Tag[],
+        answers: [
+          {
+            content: 'Answer content',
+            creation_date: new Date(),
+            user: { id: 2, name: 'user2' } as any,
+          },
+        ] as Answer[],
+      };
+
+      const queryBuilder = {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        innerJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue(mockQuestion),
+      };
+
+      jest
+        .spyOn(questionRepository, 'createQueryBuilder')
+        .mockReturnValue(queryBuilder as any);
+
+      const result = await service.findOne(id);
+
+      expect(result).toEqual(mockQuestion);
+    });
+
+    it('should throw NotFoundException if the question is not found', async () => {
+      const id = 1;
+
+      const queryBuilder = {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        innerJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue(null),
+      };
+
+      jest
+        .spyOn(questionRepository, 'createQueryBuilder')
+        .mockReturnValue(queryBuilder as any);
+
+      await expect(service.findOne(id)).rejects.toThrow(NotFoundException);
     });
   });
 });
