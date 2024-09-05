@@ -26,7 +26,7 @@ export class QuestionsService {
 
     const alreadyExist = await this.questionRepository.findOneBy({
       title: createQuestionInput.title,
-      userId: userId,
+      user_id: userId,
     });
 
     if (alreadyExist === null) {
@@ -51,7 +51,7 @@ export class QuestionsService {
 
       const questionCreated = await this.questionRepository.save({
         ...createQuestionInput,
-        userId: userId,
+        user_id: userId,
         tags: tags,
       });
 
@@ -70,7 +70,7 @@ export class QuestionsService {
           .createQueryBuilder('question')
           .leftJoinAndSelect('question.tags', 'tag')
           .leftJoinAndSelect('question.user', 'user')
-          .orderBy('question.creation_date', 'DESC')
+          .orderBy('question.creationDate', 'DESC')
           .innerJoinAndSelect('question.tags', 'tags')
           .andWhere('tag.id IN (:...tagIds)', {
             tagIds: searchInput.filter_tag_ids,
@@ -86,7 +86,7 @@ export class QuestionsService {
         questions = await this.questionRepository.find({
           relations: ['tags', 'user'],
           order: { creation_date: 'DESC' },
-          where: { userId },
+          where: { user_id: userId },
         });
 
         return questions;

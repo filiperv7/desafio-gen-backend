@@ -36,8 +36,8 @@ export class Question {
   @ManyToMany(() => Tag, (tag) => tag.questions, { cascade: true })
   @JoinTable({
     name: 'questions_tags',
-    joinColumn: { name: 'question_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'tag_id', referencedColumnName: 'id' },
+    joinColumn: { name: 'questionId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'tagId', referencedColumnName: 'id' },
   })
   tags: Tag[];
 
@@ -46,8 +46,8 @@ export class Question {
   user: UserAuth;
 
   @Field(() => Int)
-  @Column()
-  userId: number;
+  @Column({ name: 'userId' })
+  user_id: number;
 
   @Field(() => [Answer])
   @OneToMany(() => Answer, (answer) => answer.question)

@@ -72,7 +72,7 @@ describe('QuestionsService', () => {
       jest.spyOn(questionRepository, 'save').mockResolvedValue({
         id: 1,
         ...createQuestionInput,
-        userId: decodedToken.id,
+        user_id: decodedToken.id,
         tags: [
           { id: 1, tag_name: 'tag1' },
           { id: 2, tag_name: 'tag2' },
@@ -124,7 +124,7 @@ describe('QuestionsService', () => {
           { id: 2, tag_name: 'Tag 2' },
         ],
         user: { id: 1, username: 'user1' } as any,
-        userId: 1,
+        user_id: 1,
       } as Question,
     ];
 
