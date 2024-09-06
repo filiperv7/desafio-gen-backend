@@ -190,8 +190,21 @@ export class QuestionsService {
     throw new ConflictException('Você já fez esta pergunta');
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} question`;
+  async remove(id: number, token: string) {
+    const userId = this.decodeToken(token);
+
+    const question = await this.questionRepository.findOneBy({ id });
+
+    if (!question) throw new NotFoundException('Pergunta não encontrada!');
+
+    if (question.user_id !== userId)
+      throw new UnauthorizedException(
+        'Você só pode apagar suas próprias perguntas.',
+      );
+
+    await this.questionRepository.delete(id);
+
+    return question;
   }
 
   private decodeToken(token: string): number {

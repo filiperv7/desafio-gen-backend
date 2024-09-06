@@ -354,4 +354,48 @@ describe('QuestionsService', () => {
       ).rejects.toThrow(UnauthorizedException);
     });
   });
+
+  describe('remove', () => {
+    const questionId = 1;
+    const mockToken = 'Bearer sample.jwt.token';
+
+    const mockQuestion = {
+      id: questionId,
+      title: 'Sample Question',
+      description: 'Sample description',
+      user_id: 1,
+    } as Question;
+
+    it('should remove a question successfully', async () => {
+      jest.spyOn(jwtService, 'decode').mockReturnValue({ id: 1 });
+      jest
+        .spyOn(questionRepository, 'findOneBy')
+        .mockResolvedValue(mockQuestion);
+      jest.spyOn(questionRepository, 'delete').mockResolvedValue(undefined);
+
+      const result = await service.remove(questionId, mockToken);
+
+      expect(result).toEqual(mockQuestion);
+    });
+
+    it('should throw NotFoundException if question is not found', async () => {
+      jest.spyOn(jwtService, 'decode').mockReturnValue({ id: 1 });
+      jest.spyOn(questionRepository, 'findOneBy').mockResolvedValue(null);
+
+      await expect(service.remove(questionId, mockToken)).rejects.toThrow(
+        'Pergunta não encontrada!',
+      );
+    });
+
+    it('should throw UnauthorizedException if the user is not the author of the question', async () => {
+      jest.spyOn(jwtService, 'decode').mockReturnValue({ id: 3 });
+      jest
+        .spyOn(questionRepository, 'findOneBy')
+        .mockResolvedValue(mockQuestion);
+
+      await expect(service.remove(questionId, mockToken)).rejects.toThrow(
+        'Você só pode apagar suas próprias perguntas.',
+      );
+    });
+  });
 });

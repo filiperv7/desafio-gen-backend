@@ -50,7 +50,12 @@ export class QuestionsResolver {
   }
 
   @Mutation(() => Question)
-  removeQuestion(@Args('id', { type: () => Int }) id: number) {
-    return this.questionsService.remove(id);
+  removeQuestion(
+    @Args('id', { type: () => Int }) id: number,
+    @Context() context: { req: Request },
+  ) {
+    const token = context.req.headers.authorization;
+
+    return this.questionsService.remove(id, token);
   }
 }
