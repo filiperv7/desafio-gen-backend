@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -26,14 +30,14 @@ export class AnswersService {
 
     const answer = await this.answerRepository.findOneBy({
       id,
-      user_id: userId,
     });
 
-    if (!answer) {
+    if (!answer) throw new NotFoundException('Resposta não encontrada!');
+
+    if (answer.user_id !== userId)
       throw new BadRequestException(
         'Uma resposta só pode ser apagada pelo seu autor.',
       );
-    }
 
     await this.answerRepository.delete(id);
 

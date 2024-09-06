@@ -65,17 +65,19 @@ describe('AnswersService', () => {
   });
 
   describe('remove', () => {
+    const decodedToken = { id: 1 };
+    const answerId = 3;
+
+    const mockAnswer: Partial<Answer> = {
+      id: answerId,
+      content: 'Test content',
+      question_id: 1,
+      user_id: 1,
+      creation_date: new Date(Date.now()),
+    };
+
     it('should remove an answer if user is the author', async () => {
       const token = 'Bearer sample.jwt.token';
-      const decodedToken = { id: 1 };
-      const answerId = 3;
-      const mockAnswer: Partial<Answer> = {
-        id: answerId,
-        content: 'Test content',
-        question_id: 1,
-        user_id: decodedToken.id,
-        creation_date: new Date(Date.now()),
-      };
 
       jest.spyOn(jwtService, 'decode').mockReturnValue(decodedToken);
       jest
@@ -88,13 +90,24 @@ describe('AnswersService', () => {
       expect(result).toEqual(mockAnswer);
     });
 
-    it('should throw an error if user is not the author', async () => {
+    it('should throw an error if answer not exists', async () => {
       const token = 'Bearer sample.jwt.token';
-      const decodedToken = { id: 1 };
-      const answerId = 3;
 
       jest.spyOn(jwtService, 'decode').mockReturnValue(decodedToken);
       jest.spyOn(repository, 'findOneBy').mockResolvedValue(null);
+
+      await expect(service.remove(answerId, token)).rejects.toThrow(
+        'Resposta não encontrada!',
+      );
+    });
+
+    it('should throw an error if user is not the author', async () => {
+      const token = 'Bearer sample.jwt.token';
+
+      jest.spyOn(jwtService, 'decode').mockReturnValue({ id: 7 });
+      jest
+        .spyOn(repository, 'findOneBy')
+        .mockResolvedValue(mockAnswer as Answer);
 
       await expect(service.remove(answerId, token)).rejects.toThrow(
         'Uma resposta só pode ser apagada pelo seu autor.',
