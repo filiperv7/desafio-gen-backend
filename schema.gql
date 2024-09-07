@@ -55,6 +55,7 @@ type Query {
   login(login: LoginInput!): UserJwtOutput!
   questions(searchInput: SearchInput): [Question!]!
   question(id: Int!): Question!
+  tags: [Tag!]!
 }
 
 input LoginInput {

@@ -124,6 +124,14 @@ export class QuestionsService {
     throw new NotFoundException('Pergunta não encontrada!');
   }
 
+  async findAllTags(): Promise<Tag[]> {
+    const tags: Tag[] = await this.tagRepository.find({
+      order: { tag_name: 'asc' },
+    });
+
+    return tags;
+  }
+
   async update(
     id: number,
     updateQuestionInput: UpdateQuestionInput,

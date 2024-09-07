@@ -230,6 +230,21 @@ describe('QuestionsService', () => {
     });
   });
 
+  describe('findAllTags', () => {
+    it('should return all tags', async () => {
+      const mockTags: Tag[] = [
+        { id: 2, tag_name: 'Alpha' },
+        { id: 1, tag_name: 'Beta' },
+      ] as Tag[];
+
+      jest.spyOn(tagRepository, 'find').mockResolvedValue(mockTags);
+
+      const result = await service.findAllTags();
+
+      expect(result).toEqual(mockTags);
+    });
+  });
+
   describe('update', () => {
     const updateQuestionInput: UpdateQuestionInput = {
       id: 3,

@@ -4,6 +4,7 @@ import { CreateQuestionInput } from './dto/create-question.input';
 import { SearchInput } from './dto/search.input';
 import { UpdateQuestionInput } from './dto/update-question.input';
 import { Question } from './entities/question.entity';
+import { Tag } from './entities/tag.entity';
 import { QuestionsService } from './questions.service';
 
 @Resolver(() => Question)
@@ -33,6 +34,11 @@ export class QuestionsResolver {
   @Query(() => Question, { name: 'question' })
   findOne(@Args('id', { type: () => Int }) id: number) {
     return this.questionsService.findOne(id);
+  }
+
+  @Query(() => [Tag], { name: 'tags' })
+  findAllTags() {
+    return this.questionsService.findAllTags();
   }
 
   @Mutation(() => Question)
