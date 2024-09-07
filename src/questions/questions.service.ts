@@ -76,6 +76,7 @@ export class QuestionsService {
           .createQueryBuilder('question')
           .leftJoinAndSelect('question.tags', 'tag')
           .leftJoinAndSelect('question.user', 'user')
+          .leftJoinAndSelect('question.answers', 'answers')
           .orderBy('question.creationDate', 'DESC')
           .innerJoinAndSelect('question.tags', 'tags')
           .andWhere('tag.id IN (:...tagIds)', {
@@ -90,7 +91,7 @@ export class QuestionsService {
         const userId = this.decodeToken(token);
 
         questions = await this.questionRepository.find({
-          relations: ['tags', 'user'],
+          relations: ['tags', 'user', 'answers'],
           order: { creation_date: 'DESC' },
           where: { user_id: userId },
         });
@@ -101,7 +102,7 @@ export class QuestionsService {
 
     if (searchInput === undefined) {
       questions = await this.questionRepository.find({
-        relations: ['tags', 'user'],
+        relations: ['tags', 'user', 'answers'],
         order: { creation_date: 'DESC' },
       });
 
