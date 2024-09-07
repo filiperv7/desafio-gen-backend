@@ -8,6 +8,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Answer } from '../answers/entities/answer.entity';
 import { CreateQuestionInput } from './dto/create-question.input';
 import { SearchInput } from './dto/search.input';
 import { UpdateQuestionInput } from './dto/update-question.input';
@@ -21,6 +22,7 @@ export class QuestionsService {
     private questionRepository: Repository<Question>,
     @InjectRepository(Tag)
     private tagRepository: Repository<Tag>,
+    @InjectRepository(Answer) private answerRepository: Repository<Answer>,
     private readonly jwt: JwtService,
   ) {}
 
@@ -202,7 +204,10 @@ export class QuestionsService {
   async remove(id: number, token: string) {
     const userId = this.decodeToken(token);
 
-    const question = await this.questionRepository.findOneBy({ id });
+    const question = await this.questionRepository.findOne({
+      where: { id },
+      relations: ['answers'],
+    });
 
     if (!question) throw new NotFoundException('Pergunta não encontrada!');
 
@@ -210,6 +215,14 @@ export class QuestionsService {
       throw new UnauthorizedException(
         'Você só pode apagar suas próprias perguntas.',
       );
+
+    if (question.answers.length > 0) {
+      await Promise.all(
+        question.answers.map(async (answer) => {
+          await this.answerRepository.delete(answer.id);
+        }),
+      );
+    }
 
     await this.questionRepository.delete(id);
 

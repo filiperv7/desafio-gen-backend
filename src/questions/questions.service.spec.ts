@@ -7,9 +7,9 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Answer } from 'src/answers/entities/answer.entity';
-import { UserAuth } from 'src/user-auth/entities/user-auth.entity';
 import { Repository } from 'typeorm';
+import { Answer } from '../answers/entities/answer.entity';
+import { UserAuth } from '../user-auth/entities/user-auth.entity';
 import { CreateQuestionInput } from './dto/create-question.input';
 import { CreateTagInput } from './dto/create-tag.input';
 import { SearchInput } from './dto/search.input';
@@ -22,6 +22,7 @@ describe('QuestionsService', () => {
   let service: QuestionsService;
   let questionRepository: Repository<Question>;
   let tagRepository: Repository<Tag>;
+  let answerRepository: Repository<Answer>;
   let jwtService: JwtService;
 
   beforeEach(async () => {
@@ -34,6 +35,10 @@ describe('QuestionsService', () => {
         },
         {
           provide: getRepositoryToken(Tag),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(Answer),
           useClass: Repository,
         },
         {
@@ -50,6 +55,9 @@ describe('QuestionsService', () => {
       getRepositoryToken(Question),
     );
     tagRepository = module.get<Repository<Tag>>(getRepositoryToken(Tag));
+    answerRepository = module.get<Repository<Answer>>(
+      getRepositoryToken(Answer),
+    );
     jwtService = module.get<JwtService>(JwtService);
   });
 
@@ -379,13 +387,12 @@ describe('QuestionsService', () => {
       title: 'Sample Question',
       description: 'Sample description',
       user_id: 1,
+      answers: [],
     } as Question;
 
     it('should remove a question successfully', async () => {
       jest.spyOn(jwtService, 'decode').mockReturnValue({ id: 1 });
-      jest
-        .spyOn(questionRepository, 'findOneBy')
-        .mockResolvedValue(mockQuestion);
+      jest.spyOn(questionRepository, 'findOne').mockResolvedValue(mockQuestion);
       jest.spyOn(questionRepository, 'delete').mockResolvedValue(undefined);
 
       const result = await service.remove(questionId, mockToken);
@@ -395,7 +402,7 @@ describe('QuestionsService', () => {
 
     it('should throw NotFoundException if question is not found', async () => {
       jest.spyOn(jwtService, 'decode').mockReturnValue({ id: 1 });
-      jest.spyOn(questionRepository, 'findOneBy').mockResolvedValue(null);
+      jest.spyOn(questionRepository, 'findOne').mockResolvedValue(null);
 
       await expect(service.remove(questionId, mockToken)).rejects.toThrow(
         'Pergunta não encontrada!',
@@ -404,13 +411,23 @@ describe('QuestionsService', () => {
 
     it('should throw UnauthorizedException if the user is not the author of the question', async () => {
       jest.spyOn(jwtService, 'decode').mockReturnValue({ id: 3 });
-      jest
-        .spyOn(questionRepository, 'findOneBy')
-        .mockResolvedValue(mockQuestion);
+      jest.spyOn(questionRepository, 'findOne').mockResolvedValue(mockQuestion);
 
       await expect(service.remove(questionId, mockToken)).rejects.toThrow(
         'Você só pode apagar suas próprias perguntas.',
       );
+    });
+
+    it('should remove a question with your answers successfully', async () => {
+      mockQuestion.answers = [{ id: 1 } as Answer];
+      jest.spyOn(jwtService, 'decode').mockReturnValue({ id: 1 });
+      jest.spyOn(questionRepository, 'findOne').mockResolvedValue(mockQuestion);
+      jest.spyOn(answerRepository, 'delete').mockResolvedValue(undefined);
+      jest.spyOn(questionRepository, 'delete').mockResolvedValue(undefined);
+
+      const result = await service.remove(questionId, mockToken);
+
+      expect(result).toEqual(mockQuestion);
     });
   });
 });

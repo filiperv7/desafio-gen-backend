@@ -70,11 +70,11 @@ input SearchInput {
 
 type Mutation {
   createUserAuth(createUserAuthInput: CreateUserAuthInput!): UserAuth!
+  createAnswer(createAnswerInput: CreateAnswerInput!): Answer!
+  removeAnswer(id: Int!): Answer!
   createQuestion(createQuestionInput: CreateQuestionInput!): Question!
   updateQuestion(updateQuestionInput: UpdateQuestionInput!): Question!
   removeQuestion(id: Int!): Question!
-  createAnswer(createAnswerInput: CreateAnswerInput!): Answer!
-  removeAnswer(id: Int!): Answer!
 }
 
 input CreateUserAuthInput {
@@ -83,6 +83,11 @@ input CreateUserAuthInput {
   nick_name: String!
   password: String!
   position: String!
+}
+
+input CreateAnswerInput {
+  content: String!
+  question_id: Int!
 }
 
 input CreateQuestionInput {
@@ -103,9 +108,4 @@ input UpdateQuestionInput {
   creation_date: DateTime
   tags: [CreateTagInput!]!
   id: Int!
-}
-
-input CreateAnswerInput {
-  content: String!
-  question_id: Int!
 }

@@ -2,6 +2,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Answer } from '../answers/entities/answer.entity';
 import { Question } from './entities/question.entity';
 import { Tag } from './entities/tag.entity';
 import { QuestionsResolver } from './questions.resolver';
@@ -21,6 +22,10 @@ describe('QuestionsResolver', () => {
         },
         {
           provide: getRepositoryToken(Tag),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(Answer),
           useClass: Repository,
         },
         {
