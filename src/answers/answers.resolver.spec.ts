@@ -5,6 +5,8 @@ import { Repository } from 'typeorm';
 import { AnswersResolver } from './answers.resolver';
 import { AnswersService } from './answers.service';
 import { Answer } from './entities/answer.entity';
+import { CreateAnswerUsecase } from './use-case/create/create-answer.usecase';
+import { RemoveAnswerUsecase } from './use-case/remove/remove-answer.usecase';
 
 describe('AnswersResolver', () => {
   let resolver: AnswersResolver;
@@ -17,6 +19,18 @@ describe('AnswersResolver', () => {
         {
           provide: getRepositoryToken(Answer),
           useClass: Repository,
+        },
+        {
+          provide: CreateAnswerUsecase,
+          useValue: {
+            create: jest.fn(),
+          },
+        },
+        {
+          provide: RemoveAnswerUsecase,
+          useValue: {
+            removeAnswer: jest.fn(),
+          },
         },
         {
           provide: JwtService,

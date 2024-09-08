@@ -3,12 +3,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AnswersService } from './answers.service';
-import { CreateAnswerInput } from './dto/create-answer.input';
 import { Answer } from './entities/answer.entity';
+import { CreateAnswerUsecase } from './use-case/create/create-answer.usecase';
+import { RemoveAnswerUsecase } from './use-case/remove/remove-answer.usecase';
 
 describe('AnswersService', () => {
   let service: AnswersService;
-  let repository: Repository<Answer>;
+  let createAnswerUsecase: CreateAnswerUsecase;
+  let removeAnswerUsecase: RemoveAnswerUsecase;
   let jwtService: JwtService;
 
   beforeEach(async () => {
@@ -20,6 +22,18 @@ describe('AnswersService', () => {
           useClass: Repository,
         },
         {
+          provide: CreateAnswerUsecase,
+          useValue: {
+            create: jest.fn(),
+          },
+        },
+        {
+          provide: RemoveAnswerUsecase,
+          useValue: {
+            removeAnswer: jest.fn(),
+          },
+        },
+        {
           provide: JwtService,
           useValue: {
             decode: jest.fn(),
@@ -29,89 +43,12 @@ describe('AnswersService', () => {
     }).compile();
 
     service = module.get<AnswersService>(AnswersService);
-    repository = module.get<Repository<Answer>>(getRepositoryToken(Answer));
+    createAnswerUsecase = module.get<CreateAnswerUsecase>(CreateAnswerUsecase);
+    removeAnswerUsecase = module.get<RemoveAnswerUsecase>(RemoveAnswerUsecase);
     jwtService = module.get<JwtService>(JwtService);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
-  });
-
-  describe('create', () => {
-    it('should create and save an answer', async () => {
-      const createAnswerInput: CreateAnswerInput = {
-        content: 'Test content',
-        question_id: 1,
-      };
-      const token = 'Bearer sample.jwt.token';
-      const decodedToken = { id: 1 };
-      const mockSavedAnswer: Partial<Answer> = {
-        id: 3,
-        content: createAnswerInput.content,
-        question_id: createAnswerInput.question_id,
-        user_id: decodedToken.id,
-        creation_date: new Date(Date.now()),
-      };
-
-      jest.spyOn(jwtService, 'decode').mockReturnValue(decodedToken);
-      jest
-        .spyOn(repository, 'save')
-        .mockResolvedValue(mockSavedAnswer as Answer);
-
-      const result = await service.create(createAnswerInput, token);
-
-      expect(result).toEqual(mockSavedAnswer);
-    });
-  });
-
-  describe('remove', () => {
-    const decodedToken = { id: 1 };
-    const answerId = 3;
-
-    const mockAnswer: Partial<Answer> = {
-      id: answerId,
-      content: 'Test content',
-      question_id: 1,
-      user_id: 1,
-      creation_date: new Date(Date.now()),
-    };
-
-    it('should remove an answer if user is the author', async () => {
-      const token = 'Bearer sample.jwt.token';
-
-      jest.spyOn(jwtService, 'decode').mockReturnValue(decodedToken);
-      jest
-        .spyOn(repository, 'findOneBy')
-        .mockResolvedValue(mockAnswer as Answer);
-      jest.spyOn(repository, 'delete').mockResolvedValue({} as any);
-
-      const result = await service.remove(answerId, token);
-
-      expect(result).toEqual(mockAnswer);
-    });
-
-    it('should throw an error if answer not exists', async () => {
-      const token = 'Bearer sample.jwt.token';
-
-      jest.spyOn(jwtService, 'decode').mockReturnValue(decodedToken);
-      jest.spyOn(repository, 'findOneBy').mockResolvedValue(null);
-
-      await expect(service.remove(answerId, token)).rejects.toThrow(
-        'Resposta não encontrada!',
-      );
-    });
-
-    it('should throw an error if user is not the author', async () => {
-      const token = 'Bearer sample.jwt.token';
-
-      jest.spyOn(jwtService, 'decode').mockReturnValue({ id: 7 });
-      jest
-        .spyOn(repository, 'findOneBy')
-        .mockResolvedValue(mockAnswer as Answer);
-
-      await expect(service.remove(answerId, token)).rejects.toThrow(
-        'Uma resposta só pode ser apagada pelo seu autor.',
-      );
-    });
   });
 });
