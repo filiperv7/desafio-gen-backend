@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Answer } from '../answers/entities/answer.entity';
 import { Question } from './entities/question.entity';
@@ -9,6 +9,6 @@ import { QuestionsService } from './questions.service';
 
 @Module({
   providers: [QuestionsResolver, QuestionsService, JwtService],
-  imports: [TypeOrmModule.forFeature([Question, Tag, Answer])],
+  imports: [TypeOrmModule.forFeature([Question, Tag, Answer]), JwtModule],
 })
 export class QuestionsModule {}

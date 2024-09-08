@@ -1,5 +1,7 @@
+import { UseGuards } from '@nestjs/common';
 import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Request } from 'express';
+import { JwtAuthGuard } from 'src/guard/jwt-auth.guard';
 import { CreateQuestionInput } from './dto/create-question.input';
 import { SearchInput } from './dto/search.input';
 import { UpdateQuestionInput } from './dto/update-question.input';
@@ -7,6 +9,7 @@ import { Question } from './entities/question.entity';
 import { Tag } from './entities/tag.entity';
 import { QuestionsService } from './questions.service';
 
+@UseGuards(JwtAuthGuard)
 @Resolver(() => Question)
 export class QuestionsResolver {
   constructor(private readonly questionsService: QuestionsService) {}
