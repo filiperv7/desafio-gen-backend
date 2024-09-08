@@ -1,73 +1,71 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Bem vindo(a)
+Esta é uma aplicação Node/NestJS com TypeORM; usei Jest para os testes unitários.
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+#### Aqui está o [Front-end](https://github.com/filiperv7/desafio-gen-frontend) desta aplicação.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+A aplicação tem como foco em ajudar nos estudos dos devs, com a oportunidade de tirar dúvidas com pessoas mais experiêntes. Funciona assim:
+- crie sua conta;
+- faça login;
+- navegue pelas perguntas existentes; ou
+- faça um nova pergunta;
+- você também pode responder perguntas.
 
-## Description
+## Regras de negócio
+1. Os recursos de perguntas e respostas só estão disponíveis para usuários autenticados com token JWT válido.
+2. Para criar um pergunta o usuário deve, obrigatóriamente, preeencher o titulo, descrição e alguma tag.
+3. Para criar um pergunta é obrigatório adicionar pelo menos 1 tag relacionada ao assunto e no máximo 3.
+4. Uma pergunta só pode ser editada pelo seu próprio autor.
+5. Uma pergunta só pode ser editada se ainda não tiver nenhuma resposta.
+6. Ao editar uma pergunta, todas as regras de criação são válidas aqui também.
+7. Uma pergunta só pode ser excluída pelo seu próprio autor.
+8. Ao excluir uma pergunta, suas respostas, caso existem, também são excluídas do banco.
+9. Você pode responder as perguntas de qualquer pessoa, inclusive as suas.
+10. Ninguém pode editar nenhuma resposta.
+11. Uma resposta só pode ser excluída pelo seu próprio autor.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Installation
+## Como rodar a aplicação
 
+##### - Clone o projeto
 ```bash
-$ npm install
+git clone https://github.com/filiperv7/desafio-gen-backend
 ```
 
-## Running the app
+##### - Acesse a pasta do projeto
+```bash
+cd desafio-gen-backend
+```
+
+##### - Faça a instalação dos pacotes
+
+```bash
+npm install
+```
+
+##### - Crie um arquivo .env na raiz do projeto
+###### O arquivo deve ter as seguintes variáveis:
+
+_PORT_ (a porta onde a aplicação vai rodar, 6001, por exemplo)
+
+_JWT_SECRET_ (alguma string ou hash que sisva de secret para a criação dos tokens JWT)
+
+##### - Rode a aplicação
 
 ```bash
 # development
-$ npm run start
+npm run start
 
 # watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm run start:dev
 ```
 
-## Test
+##### E pronto! A aplicação já está rodando
+Agora é só acessar http://localhost:_PORT_/graphql para ter acesso ao Sandbox do Apollo GraphQL e fazer as requisição
+
+##### Para rodar os testes
 
 ```bash
 # unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+ npm run test
 ```
 
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
