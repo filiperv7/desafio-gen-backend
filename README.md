@@ -60,7 +60,7 @@ npm run start:dev
 ```
 
 ##### E pronto! A aplicação já está rodando
-Agora é só acessar http://localhost:_PORT_/graphql para ter acesso ao Sandbox do Apollo GraphQL e fazer as requisição
+Agora é só acessar http://localhost:6001/graphql para ter acesso ao Sandbox do Apollo GraphQL e fazer as requisição
 
 ##### Para rodar os testes
 
