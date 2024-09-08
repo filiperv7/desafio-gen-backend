@@ -1,8 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { LoginAuthJwt } from '../utils/login-auth-jwt.util';
-import { UserAuth } from './entities/user-auth.entity';
+import { CreateUserUsecase } from './use-cases/create/create-user.usecase';
+import { LoginUsecase } from './use-cases/login/login.usecase';
 import { UserAuthResolver } from './user-auth.resolver';
 import { UserAuthService } from './user-auth.service';
 
@@ -15,13 +13,15 @@ describe('UserAuthResolver', () => {
         UserAuthResolver,
         UserAuthService,
         {
-          provide: getRepositoryToken(UserAuth),
-          useClass: Repository, // Fornecendo o repositório no contexto do teste
+          provide: CreateUserUsecase,
+          useValue: {
+            create: jest.fn(),
+          },
         },
         {
-          provide: LoginAuthJwt,
+          provide: LoginUsecase,
           useValue: {
-            generateJwtToken: jest.fn(),
+            login: jest.fn(),
           },
         },
       ],
