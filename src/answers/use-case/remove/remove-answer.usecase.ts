@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { decodeToken } from '../../../utils/decode-token.util';
 import { FindAnswerRepository } from './../../repositories/find-answer.repository';
 import { RemoveAnswerRepository } from './../../repositories/remove-answer.repository';
 
@@ -16,7 +17,7 @@ export class RemoveAnswerUsecase {
   ) {}
 
   async removeAnswer(id: number, token: string) {
-    const userId = this.decodeToken(token);
+    const userId = decodeToken(token, this.jwt);
 
     const answer = await this.findAnswerRepository.findOne(id);
 
@@ -30,16 +31,5 @@ export class RemoveAnswerUsecase {
     await this.removeAnswerRepository.remove(id);
 
     return answer;
-  }
-
-  private decodeToken(token: string): number {
-    const tokenCleaned = token.split(' ')[1];
-    if (tokenCleaned) {
-      const decode = this.jwt.decode(tokenCleaned, { complete: false });
-
-      return decode.id;
-    }
-
-    return null;
   }
 }
