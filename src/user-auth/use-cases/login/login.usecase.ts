@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import {
   DataForToken,
@@ -45,6 +45,6 @@ export class LoginUsecase {
       }
     }
 
-    throw new UnauthorizedException('Credenciais inválidas!');
+    throw new BadRequestException('Credenciais inválidas!');
   }
 }
