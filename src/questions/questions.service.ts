@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -14,6 +8,12 @@ import { SearchInput } from './dto/search.input';
 import { UpdateQuestionInput } from './dto/update-question.input';
 import { Question } from './entities/question.entity';
 import { Tag } from './entities/tag.entity';
+import { CreateQuestionUsecase } from './use-case/create/create-question.usecase';
+import { FindAllQuestionsUsecase } from './use-case/find-all/find-all-questions.usecase';
+import { FindOneQuestionUsecase } from './use-case/find-one/find-one-question.usecase';
+import { FindTagsUsecase } from './use-case/find-tags/find-tags.usecase';
+import { RemoveQuestionUsecase } from './use-case/remove/remove-question.usecase';
+import { UpdateQuestionUsecase } from './use-case/update/update-question.usecase';
 
 @Injectable()
 export class QuestionsService {
@@ -24,115 +24,31 @@ export class QuestionsService {
     private tagRepository: Repository<Tag>,
     @InjectRepository(Answer) private answerRepository: Repository<Answer>,
     private readonly jwt: JwtService,
+    private readonly createQuestionUsecase: CreateQuestionUsecase,
+    private readonly findTagsUsecase: FindTagsUsecase,
+    private readonly findOneQuestionUsecase: FindOneQuestionUsecase,
+    private readonly findAllQuestionsUsecase: FindAllQuestionsUsecase,
+    private readonly removeQuestionUsecase: RemoveQuestionUsecase,
+    private readonly updateQuestionUsecase: UpdateQuestionUsecase,
   ) {}
 
   async create(
     createQuestionInput: CreateQuestionInput,
     token: string,
   ): Promise<Question> {
-    const userId = this.decodeToken(token);
-
-    const alreadyExist = await this.questionRepository.findOneBy({
-      title: createQuestionInput.title,
-      user_id: userId,
-    });
-
-    if (alreadyExist === null) {
-      const tags = await Promise.all(
-        createQuestionInput.tags.map(async (tagInput) => {
-          let tag = tagInput;
-
-          if (!tagInput.id) {
-            tag = await this.tagRepository.findOne({
-              where: { tag_name: tagInput.tag_name },
-            });
-            if (!tag) {
-              tag = await this.tagRepository.save({
-                tag_name: tagInput.tag_name,
-              });
-            }
-          }
-
-          return tag;
-        }),
-      );
-
-      const questionCreated = await this.questionRepository.save({
-        ...createQuestionInput,
-        user_id: userId,
-        tags: tags,
-      });
-
-      return questionCreated;
-    }
-
-    throw new ConflictException('Você já fez esta pergunta');
+    return await this.createQuestionUsecase.create(createQuestionInput, token);
   }
 
   async findAll(token: string, searchInput?: SearchInput): Promise<Question[]> {
-    let questions: Question[];
-
-    if (searchInput !== undefined) {
-      if (searchInput.filter_tag_ids && searchInput.filter_tag_ids.length > 0) {
-        const queryBuilder = this.questionRepository
-          .createQueryBuilder('question')
-          .leftJoinAndSelect('question.tags', 'tag')
-          .leftJoinAndSelect('question.user', 'user')
-          .leftJoinAndSelect('question.answers', 'answers')
-          .orderBy('question.creationDate', 'DESC')
-          .innerJoinAndSelect('question.tags', 'tags')
-          .andWhere('tag.id IN (:...tagIds)', {
-            tagIds: searchInput.filter_tag_ids,
-          });
-
-        questions = await queryBuilder.getMany();
-        return questions;
-      }
-
-      if (searchInput.only_mine === true) {
-        const userId = this.decodeToken(token);
-
-        questions = await this.questionRepository.find({
-          relations: ['tags', 'user', 'answers'],
-          order: { creation_date: 'DESC' },
-          where: { user_id: userId },
-        });
-
-        return questions;
-      }
-    }
-
-    if (searchInput === undefined) {
-      questions = await this.questionRepository.find({
-        relations: ['tags', 'user', 'answers'],
-        order: { creation_date: 'DESC' },
-      });
-
-      return questions;
-    }
+    return await this.findAllQuestionsUsecase.findAll(token, searchInput);
   }
 
   async findOne(id: number): Promise<Question> {
-    const question = await this.questionRepository
-      .createQueryBuilder('question')
-      .leftJoinAndSelect('question.user', 'user')
-      .leftJoinAndSelect('question.tags', 'tags')
-      .leftJoinAndSelect('question.answers', 'answers')
-      .leftJoinAndSelect('answers.user', 'answerUser')
-      .where('question.id = :id', { id })
-      .getOne();
-
-    if (question) return question;
-
-    throw new NotFoundException('Pergunta não encontrada!');
+    return await this.findOneQuestionUsecase.findOne(id);
   }
 
   async findAllTags(): Promise<Tag[]> {
-    const tags: Tag[] = await this.tagRepository.find({
-      order: { tag_name: 'asc' },
-    });
-
-    return tags;
+    return await this.findTagsUsecase.findTags();
   }
 
   async update(
@@ -140,103 +56,14 @@ export class QuestionsService {
     updateQuestionInput: UpdateQuestionInput,
     token: string,
   ): Promise<Question> {
-    const userId = this.decodeToken(token);
-
-    const question: Question = await this.questionRepository.findOne({
-      where: { id },
-      relations: ['answers', 'tags'],
-    });
-
-    if (!question) {
-      throw new NotFoundException('Pergunta não encontrada.');
-    }
-
-    if (question.user_id !== userId) {
-      throw new UnauthorizedException(
-        'Você só pode editar suas próprias perguntas.',
-      );
-    }
-
-    if (question.answers.length > 0) {
-      throw new BadRequestException(
-        'Esta pergunta já possui respostas, portanto não pode ser alterada.',
-      );
-    }
-
-    const alreadyExist = await this.questionRepository.findOneBy({
-      title: updateQuestionInput.title,
-      description: updateQuestionInput.description,
-      user_id: userId,
-    });
-
-    if (alreadyExist === null) {
-      const tags = await Promise.all(
-        updateQuestionInput.tags.map(async (tagInput) => {
-          let tag = tagInput;
-
-          if (!tagInput.id) {
-            tag = await this.tagRepository.findOne({
-              where: { tag_name: tagInput.tag_name },
-            });
-            if (!tag) {
-              tag = await this.tagRepository.save({
-                tag_name: tagInput.tag_name,
-              });
-            }
-          }
-
-          return tag;
-        }),
-      );
-
-      question.title = updateQuestionInput.title;
-      question.description = updateQuestionInput.description;
-      question.tags = tags as Tag[];
-
-      await this.questionRepository.save(question);
-
-      return question;
-    }
-
-    throw new ConflictException('Você já fez esta pergunta');
+    return await this.updateQuestionUsecase.update(
+      id,
+      updateQuestionInput,
+      token,
+    );
   }
 
   async remove(id: number, token: string) {
-    const userId = this.decodeToken(token);
-
-    const question = await this.questionRepository.findOne({
-      where: { id },
-      relations: ['answers'],
-    });
-
-    if (!question) throw new NotFoundException('Pergunta não encontrada!');
-
-    if (question.user_id !== userId)
-      throw new UnauthorizedException(
-        'Você só pode apagar suas próprias perguntas.',
-      );
-
-    if (question.answers.length > 0) {
-      await Promise.all(
-        question.answers.map(async (answer) => {
-          await this.answerRepository.delete(answer.id);
-        }),
-      );
-    }
-
-    await this.questionRepository.delete(id);
-
-    return question;
-  }
-
-  private decodeToken(token: string): number {
-    const tokenCleaned = token.split(' ')[1];
-    if (tokenCleaned) {
-      const decode = this.jwt.decode(tokenCleaned, { complete: false });
-
-      return decode.id;
-    }
-
-    return null;
+    return await this.removeQuestionUsecase.remove(id, token);
   }
 }
