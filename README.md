@@ -3,7 +3,7 @@ Esta é uma aplicação Node/NestJS com TypeORM; usei Jest para os testes unitá
 
 #### Aqui está o [Front-end](https://github.com/filiperv7/desafio-gen-frontend) desta aplicação.
 
-A aplicação tem como foco em ajudar nos estudos dos devs, com a oportunidade de tirar dúvidas com pessoas mais experiêntes. Funciona assim:
+A aplicação tem como foco ajudar nos estudos dos devs, com a oportunidade de tirar dúvidas com pessoas mais experiêntes. Funciona assim:
 - crie sua conta;
 - faça login;
 - navegue pelas perguntas existentes; ou
@@ -11,21 +11,21 @@ A aplicação tem como foco em ajudar nos estudos dos devs, com a oportunidade d
 - você também pode responder perguntas.
 
 ## Regras de negócio
-1. Os recursos de perguntas e respostas só estão disponíveis para usuários autenticados com token JWT válido.
-2. Para criar um pergunta o usuário deve, obrigatóriamente, preeencher o titulo, descrição e alguma tag.
-3. Para criar um pergunta é obrigatório adicionar pelo menos 1 tag relacionada ao assunto e no máximo 3.
+1. Os recursos de perguntas e respostas só estão disponíveis para usuários autenticados com um token JWT válido.
+2. Para criar uma pergunta o usuário deve, obrigatóriamente, preeencher o titulo, descrição e alguma tag.
+3. Para criar uma pergunta é obrigatório adicionar pelo menos 1 tag relacionada ao assunto e no máximo 3.
 4. Uma pergunta só pode ser editada pelo seu próprio autor.
 5. Uma pergunta só pode ser editada se ainda não tiver nenhuma resposta.
 6. Ao editar uma pergunta, todas as regras de criação são válidas aqui também.
 7. Uma pergunta só pode ser excluída pelo seu próprio autor.
-8. Ao excluir uma pergunta, suas respostas, caso existem, também são excluídas do banco.
+8. Ao excluir uma pergunta, suas respostas, caso existam, também são excluídas do banco.
 9. Você pode responder as perguntas de qualquer pessoa, inclusive as suas.
 10. Ninguém pode editar nenhuma resposta.
 11. Uma resposta só pode ser excluída pelo seu próprio autor.
 
 ## Algumas decisões e observações
 Escolhi o TypeORM, porque nunca tinha usado, então decidi me desafiar com ele.
-No início, como pensei em uma aplicação com CRUD mais simples, estava fazendo uma aplicação um pouco mais acoplada, pois não tinha necessidade de subdividir tanto. Mas durante o desenvolvimento fui adicionando novas coisas (alguns arquivos estavam muito grandes e um pouco complexo), então decidi refatorar toda a infraestrutura e dividir os recursos da API em usecases e desacoplar a aplicação do TypeORM com as repositories.
+No início, como pensei em uma aplicação com CRUD mais simples, estava fazendo uma aplicação um pouco mais acoplada, pois não tinha necessidade de subdividir tanto. Mas durante o desenvolvimento fui adicionando novas coisas (alguns arquivos estavam grandes e um pouco complexos), então decidi refatorar toda a infraestrutura e dividir os recursos da API em usecases e desacoplar a aplicação do TypeORM com as repositories.
 
 Cada recurso da aplicação tem uma usecase com a lógica e seus respectivos testes unitários. Basicamente as services servem mais como ponte entre a lógica do domínio e a interface da aplicação (API).
 
