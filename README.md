@@ -23,6 +23,11 @@ A aplicação tem como foco em ajudar nos estudos dos devs, com a oportunidade d
 10. Ninguém pode editar nenhuma resposta.
 11. Uma resposta só pode ser excluída pelo seu próprio autor.
 
+## Algumas decisões e observações
+Escolhi o TypeORM, porque nunca tinha usado, então decidi me desafiar com ele.
+No início, como pensei em uma aplicação com CRUD mais simples, estava fazendo uma aplicação um pouco mais acoplada, pois não tinha necessidade de subdividir tanto. Mas durante o desenvolvimento fui adicionando novas coisas (alguns arquivos estavam muito grandes e um pouco complexo), então decidi refatorar toda a infraestrutura e dividir os recursos da API em usecases e desacoplar a aplicação do TypeORM com as repositories.
+
+Cada recurso da aplicação tem uma usecase com a lógica e seus respectivos testes unitários. Basicamente as services servem mais como ponte entre a lógica do domínio e a interface da aplicação (API).
 
 ## Como rodar a aplicação
 
