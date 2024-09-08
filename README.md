@@ -1,5 +1,5 @@
 # Bem vindo(a)
-Esta é uma aplicação Node/NestJS com TypeORM; usei Jest para os testes unitários.
+Esta é uma aplicação GraphQL desenvolvida com Node/NestJS e TypeORM; usei Jest para os testes unitários.
 
 #### Aqui está o [Front-end](https://github.com/filiperv7/desafio-gen-frontend) desta aplicação.
 
