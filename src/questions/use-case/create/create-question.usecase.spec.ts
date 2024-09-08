@@ -36,9 +36,7 @@ describe('CreateQuestionUsecase', () => {
   });
 
   it('should throw ConflictException if question already exists', async () => {
-    jest
-      .spyOn(findQuestionRepository, 'checkIfExist')
-      .mockResolvedValue({} as Question);
+    jest.spyOn(findQuestionRepository, 'checkIfExist').mockResolvedValue(true);
 
     await expect(
       usecase.create(
@@ -49,7 +47,7 @@ describe('CreateQuestionUsecase', () => {
   });
 
   it('should throw InternalServerErrorException if question creation fails', async () => {
-    jest.spyOn(findQuestionRepository, 'checkIfExist').mockResolvedValue(null);
+    jest.spyOn(findQuestionRepository, 'checkIfExist').mockResolvedValue(false);
     jest
       .spyOn(createQuestionRepository, 'createQuestion')
       .mockResolvedValue(false);
@@ -63,7 +61,7 @@ describe('CreateQuestionUsecase', () => {
   });
 
   it('should create question successfully', async () => {
-    jest.spyOn(findQuestionRepository, 'checkIfExist').mockResolvedValue(null);
+    jest.spyOn(findQuestionRepository, 'checkIfExist').mockResolvedValue(false);
     jest
       .spyOn(createQuestionRepository, 'createQuestion')
       .mockResolvedValue({ id: 1, title: 'Test Question' } as Question);

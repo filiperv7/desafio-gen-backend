@@ -89,9 +89,7 @@ describe('UpdateQuestionUsecase', () => {
     jest
       .spyOn(findQuestionRepository, 'findOneQuestion')
       .mockResolvedValue(question);
-    jest
-      .spyOn(findQuestionRepository, 'checkIfExist')
-      .mockResolvedValue({} as Question);
+    jest.spyOn(findQuestionRepository, 'checkIfExist').mockResolvedValue(true);
     (decodeToken as jest.Mock).mockReturnValue(1);
 
     await expect(
@@ -108,7 +106,7 @@ describe('UpdateQuestionUsecase', () => {
     jest
       .spyOn(findQuestionRepository, 'findOneQuestion')
       .mockResolvedValue(question);
-    jest.spyOn(findQuestionRepository, 'checkIfExist').mockResolvedValue(null);
+    jest.spyOn(findQuestionRepository, 'checkIfExist').mockResolvedValue(false);
     jest
       .spyOn(updateQuestionRepository, 'updateQuestion')
       .mockResolvedValue(false);
@@ -128,7 +126,7 @@ describe('UpdateQuestionUsecase', () => {
     jest
       .spyOn(findQuestionRepository, 'findOneQuestion')
       .mockResolvedValue(question);
-    jest.spyOn(findQuestionRepository, 'checkIfExist').mockResolvedValue(null);
+    jest.spyOn(findQuestionRepository, 'checkIfExist').mockResolvedValue(false);
     jest
       .spyOn(updateQuestionRepository, 'updateQuestion')
       .mockResolvedValue(question);

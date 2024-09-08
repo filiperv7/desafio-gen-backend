@@ -1,4 +1,4 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { LoginAuthJwt } from '../../../utils/login-auth-jwt.util';
 import { FindUserRepository } from '../../repositories/find-user.repository';
@@ -65,7 +65,7 @@ describe('LoginUsecase', () => {
       });
     });
 
-    it('should throw UnauthorizedException on invalid credentials', async () => {
+    it('should throw BadRequestException on invalid credentials', async () => {
       const loginInput: LoginInput = {
         nick_name: 'johndoe',
         password: 'wrongpassword',
@@ -83,11 +83,11 @@ describe('LoginUsecase', () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       await expect(usecase.login(loginInput)).rejects.toThrow(
-        UnauthorizedException,
+        BadRequestException,
       );
     });
 
-    it('should throw UnauthorizedException if user not found', async () => {
+    it('should throw BadRequestException if user not found', async () => {
       const loginInput: LoginInput = {
         nick_name: 'johndoe',
         password: 'securepassword',
@@ -96,7 +96,7 @@ describe('LoginUsecase', () => {
       jest.spyOn(findUserRepository, 'findOne').mockResolvedValue(false);
 
       await expect(usecase.login(loginInput)).rejects.toThrow(
-        UnauthorizedException,
+        BadRequestException,
       );
     });
   });
